@@ -341,3 +341,81 @@ millionth   dfwvzFQi4mU0wfNbFOe9RoWskMLg7eEc
 Once obtaining the password, you can move onto the next level!
 
 ---
+
+## Level 8-9
+
+### The Goal
+
+The password for the next level is stored in the file `data.txt` and is the only line of text that occurs once.
+
+---
+### The Solution
+
+The commands that will be used in this level are:
+
+- `sort`: Sorts lines of text files.
+- `uniq`: Filters out repeated lines from a sorted file.
+
+First, I used the `sort` command to sort the contents of `data.txt`. This ensures that all identical lines are grouped together.
+
+Next, I paired the sort command with the `uniq` command with the `-u` option, which filters out all lines except those that appear exactly once.
+
+```bash
+sort data.txt | uniq -u
+```
+
+- `sort data.txt`: Sorts the lines in `data.txt`.
+- `uniq -u`: Filters out all duplicate lines, leaving only the line that occurs once (i.e., the password).
+
+After running this command, you will have successfully obtained the password and can move onto the next level!
+
+---
+
+## Level 9-10
+
+### The Goal
+
+The password for the next level is stored in the file data.txt in one of the few human-readable strings, preceded by several ‘=’ characters.
+
+---
+### The Solution
+
+The commands needed to pass this level are:
+
+- `strings`: Extracts printable (alphanumeric) strings from a file.
+- `grep`: Searches for patterns in a file.
+
+First, I used the `strings` command to extract only the printable strings from the file.
+
+Next, I used the `grep` command to search for the pattern with multiple `=` signs before the password, as specified.
+
+```bash
+strings data.txt | grep "======="
+
+```
+
+After executing this command, you will have obtained the password and can move on to the next level!
+
+---
+## Level 10-11
+
+### The Goal
+
+The password for the next level is stored in the file data.txt, which contains base64 encoded data
+
+---
+### The Solution
+
+The commands needed to pass this level are:
+
+- `base64`: Encodes or decodes data using base64 encoding.
+
+First, I used the `base64` command with the `-d` option to decode the contents of the `data.txt` file.
+
+```bash
+base64 -d data.txt
+```
+
+After executing this command, you will obtain the password and can move onto the next level!
+
+---
