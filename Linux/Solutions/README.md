@@ -419,3 +419,28 @@ base64 -d data.txt
 After executing this command, you will obtain the password and can move onto the next level!
 
 ---
+## Level 11-12
+
+### The Goal
+
+The password for the next level is stored in the file data.txt, where all lowercase (a-z) and uppercase (A-Z) letters have been rotated by 13 positions
+
+---
+### The Solution
+
+The command needed to pass this level is:
+
+- `tr`: Translates or replaces characters in a file.
+
+In this level, the goal is to decode the ROT13-encoded text in `data.txt`.
+
+First, I used the `tr` command to reverse theletters rotated by 13 positions with their original form. The command used was:
+
+   ```bash
+   cat data.txt | tr 'A-Za-z' 'N-ZA-Mn-za-m'
+   ```
+
+After executing this command, you will obtain the password and can move onto the next level!
+
+---
+
