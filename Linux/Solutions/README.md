@@ -13,6 +13,11 @@
 - [Level 5-6](#level-5-6)
 - [Level 6-7](#level-6-7)
 - [Level 7-8](#level-7-8)
+- [Level 8-9](#level-8-9)
+- [Level 9-10](#level-9-10)
+- [Level 10-11](#level-10-11)
+- [Level 11-12](#level-11-12)
+
 ---
 
 ## Level 0
@@ -444,3 +449,121 @@ After executing this command, you will obtain the password and can move onto the
 
 ---
 
+## Level 12-13
+
+### The Goal
+
+The password for the next level is stored in the file data.txt, which is a hexdump of a file that has been repeatedly compressed. For this level it may be useful to create a directory under /tmp in which you can work. Use mkdir with a hard to guess directory name. Or better, use the command “mktemp -d”. Then copy the datafile using cp, and rename it using mv (read the manpages!)
+
+---
+### The Solution
+
+The commands used to pass this level are 
+
+- `xxd -r`: Reverses a hexdump back into its binary form.
+- `gzip -d`: Decompresses `.gz` files.
+- `bzip2 -d`: Decompresses `.bz2` files.
+- `tar -xf`: Extracts `.tar` archives.
+- `mv`: Renames files.
+
+   I Began by creating a temporary directory in `/tmp` and copy the `data.txt` file to this directory.
+
+   ```bash
+   mktemp -d
+   cd /tmp/tmp.F5rykSJcfn
+   cp ~/data.txt .
+   ```
+
+   The file is in hexdump format, so I used a command to reverse the hexdump back to its original compressed form and save it as `data`.
+
+   ```bash
+   xxd -r data.txt data
+   ```
+
+   After converting the hexdump, the resulting file will be a series of compressed formats. The most common ones you will encounter are GZIP, BZIP2, and TAR. To decompress these files:
+
+   - **GZIP files**:Decompress by renaming the file to `.gz` and using the appropriate command.
+
+   ```bash
+      gzip -d data
+   ```
+   - **BZIP2 files**: Decompress by renaming the file to `.bz2` and using the appropriate command.
+
+   ```bash
+   bzip2 -d data
+   ```
+
+   - **TAR files**: Extract TAR archives with a command specific to extracting archives.
+
+   ```bash
+   tar -xf data
+   ```
+
+   After each decompression, inspect the file to determine its type, and continue decompressing until you retrieve the final uncompressed file.
+
+4. **Retrieve the password:**
+   Once all decompressions are complete, the final file will contain the password. View the contents of this file to get the password.
+
+   ```bash
+   cat data
+   ```
+
+## Level 13-14
+
+### The Goal
+
+The password for the next level is stored in /etc/bandit_pass/bandit14 and can only be read by user bandit14. For this level, you don’t get the next password, but you get a private SSH key that can be used to log into the next level. Note: localhost is a hostname that refers to the machine you are working on
+
+---
+### The Solution
+
+- `scp`: Securely copies files between hosts.
+- `ssh`: Logs into a remote system securely.
+- `cat`: Displays the content of a file.
+
+   First, securely copy the SSH private key from the Bandit server to your local machine. This key is located at `/home/bandit13/sshkey.private`. Use the `scp` command for this task, specifying the SSH port (2220) and the path where you want to save the key on your local machine.
+
+   ```bash
+   scp -P 2220 bandit13@bandit.labs.overthewire.org:/home/bandit13/sshkey.private /path/to/local/directory
+   ```
+
+   After copying the private key, use it to authenticate and log in as the `bandit14` user on the Bandit server. Specify the identity file (the private key) and the SSH port (2220) during the login process.
+
+   ```bash
+   ssh -i /path/to/sshkey.private bandit14@bandit.labs.overthewire.org -p 2220
+   ```
+
+   Once you are logged in as `bandit14`, the password for the next level is stored in the file `/etc/bandit_pass/bandit14`. Display the password to access the next level.
+
+   ```bash
+   cat /etc/bandit_pass/bandit14
+   ```
+
+   After executing that command you will successfully retrieved the password and can move onto the next level!
+
+---
+
+## Level 14-15
+
+### The Goal
+
+The password for the next level can be retrieved by submitting the password of the current level to port 30000 on localhost.
+
+---
+### The Solution
+
+The commands used for this level are:
+
+- `nc` Allows you to connect to a server
+
+   For this level i used the `nc` command to open the server name localhost on port 30000
+
+   ```bash
+   nc localhost 30000
+   ```
+
+   After this i submitted the password which allowed me to retieve the password for the next Level!
+
+
+
+   
