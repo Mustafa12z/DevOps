@@ -97,3 +97,67 @@ At a high level:
 
 ---
 
+## Layer 2: Data Link Layer
+
+The **Data Link Layer** (Layer 2) is responsible for enabling device-to-device communication over the same network. It builds on the physical transmission (Layer 1) and ensures that data is correctly formatted and sent to the intended device.
+
+### Key Functions:
+
+- **Frames**: At this layer, data is organized into **frames**. A frame acts as a container that holds the data, along with necessary addressing and error-checking information.
+  
+  **Example**: Think of frames like envelopes. The data is the letter, while the envelope has a return address (source MAC), a recipient's address (destination MAC), and a stamp (Frame Check Sequence) to ensure delivery.
+
+- **MAC Address**: Each device connected to a Layer 2 network is identified by a unique 48-bit **MAC address**. This hardware address ensures that data reaches the correct destination on a local network.
+
+  **Example**: Your laptop's network interface has a MAC address like `00:1A:2B:3C:4D:5E`. When sending data on a local network, other devices use this address to communicate specifically with your laptop.
+
+- **Encapsulation**: Layer 2 encapsulates higher-layer data (from Layer 3, such as IP packets) inside frames. It acts as a translator between Layer 3's packet-based communication and the raw data transmission of Layer 1.
+
+  **Example**: When accessing a website, the data sent to your device includes an IP packet (Layer 3), which is encapsulated in an Ethernet frame (Layer 2).
+
+- **Media Access Control (MAC)**: Layer 2 controls access to the physical transmission medium, ensuring that only one device transmits at a time. **CSMA/CD** (Carrier Sense Multiple Access with Collision Detection) helps manage access and deal with collisions.
+
+  **Example**: In a crowded network where multiple devices try to send data at once (like people speaking over each other), CSMA/CD listens to the medium (network cable) to ensure it's clear before sending data, and if a collision happens, devices wait a random time before retrying.
+
+- **Error Detection**: Frames include a **Frame Check Sequence (FCS)**, which uses a **Cyclic Redundancy Check (CRC)** to detect errors during transmission.
+
+  **Example**: Imagine sending a file over the network. The FCS acts like a checksum, ensuring the data wasn’t corrupted in transit. If the receiving device detects an error, it can request a resend.
+
+### Frame Structure:
+
+- **Preamble & Start Frame Delimiter**: Marks the beginning of a frame.
+- **Destination & Source MAC Address**: Specifies the recipient and sender device.
+- **EtherType**: Indicates which protocol (e.g., IP) is being used at Layer 3.
+- **Payload**: Contains the actual data being transmitted.
+- **Frame Check Sequence (FCS)**: Used to verify data integrity.
+
+### Devices Operating at Layer 2:
+
+- **Switches**: These are intelligent Layer 2 devices that forward frames based on MAC addresses. Switches reduce network collisions by ensuring that frames are only sent to the correct port, effectively dividing the network into multiple collision domains.
+
+  **Example**: In a network with four computers connected to a switch, if Computer A sends a message to Computer B, the switch ensures only Computer B receives it. In contrast, a hub would send the message to all devices, leading to inefficiency.
+
+- **Hubs**: Layer 1 devices that forward data to all connected devices without regard to MAC addresses. This can lead to more collisions compared to switches.
+
+  **Example**: Imagine yelling in a crowded room—everyone hears you, even if you're only trying to talk to one person. That's how a hub operates.
+
+### Key Protocols:
+
+- **Ethernet**: The most common Layer 2 protocol used in LANs (Local Area Networks).
+- **CSMA/CD**: Ensures that devices share the medium (network cable) efficiently by detecting and handling collisions.
+
+### Unicast, Broadcast, and Multicast:
+
+- **Unicast**: Communication between a single sender and a single recipient. 
+
+  **Example**: Sending a direct message to one person.
+
+- **Broadcast**: Communication where a frame is sent to all devices on the network.
+
+  **Example**: A DHCP server broadcasting an IP address offer to all devices on the network.
+
+- **Multicast**: Communication where a frame is sent to a specific group of devices.
+
+  **Example**: Streaming a live event to multiple specific users without broadcasting to everyone.
+
+Layer 2 ensures that data reaches the correct device on a local network, playing a crucial role in network communication and traffic management.
