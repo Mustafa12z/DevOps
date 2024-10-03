@@ -624,7 +624,7 @@ An application hosted on multiple EC2 instances across `us-east-1a`, `us-east-1b
 
 ---
 
-### Amazon Machine Images (AMIs)
+## Amazon Machine Images (AMIs)
 
 An **Amazon Machine Image (AMI)** represents a pre-configured template that contains the essential information to launch an EC2 instance, including the operating system, software configuration, monitoring tools, and installed applications. AMIs can be either provided by AWS, created by users, or purchased through the AWS Marketplace.
 
