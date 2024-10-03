@@ -574,3 +574,89 @@ AWS offers several purchasing options for EC2 instances based on workload requir
 
 ---
 
+# 📦 EC2 Instance Storage
+
+This section will cover the different storage options for EC2 instances. EC2 storage provides various methods to store and manage data based on use cases. The three main storage types we'll explore are **EBS (Elastic Block Store)**, **EC2 Instance Store**, and **EFS (Elastic File System)**.
+
+## Elastic Block Store (EBS)
+EBS Volumes are network drives you can attach to EC2 instances. They persist data even after the instance is terminated, which makes them ideal for long-term storage.
+
+- **Availability Zones**: EBS volumes are bound to specific Availability Zones. For example, an EBS volume created in `us-east-1a` cannot be attached to an EC2 instance in `us-east-1b` unless you create a snapshot and restore it to the new AZ.
+- **IOPS (Input/Output Operations per Second)**: When creating an EBS volume, you must provision the capacity and IOPS in advance, depending on your performance needs.
+- **Delete on Termination**: This attribute controls whether the EBS volume is deleted when the EC2 instance is terminated. By default, the root volume is deleted, but you can change this behavior.
+
+### Example Use Case:
+An EC2 instance in `us-east-1a` has an attached EBS volume. If you stop the instance and start another instance in the same AZ, you can attach the same EBS volume to the new instance and continue where you left off.
+
+### EBS Snapshots:
+You can take snapshots (backups) of EBS volumes to create a restore point. Snapshots allow you to copy data across regions or AZs.
+
+- **EBS Snapshot Archive**: Move snapshots to an archive tier for a 75% cost reduction, but note that restoration from the archive takes 24-72 hours.
+- **EBS Recycle Bin**: Snapshots can be temporarily stored in a recycle bin before permanent deletion.
+
+---
+
+## EC2 Instance Store
+Instance Store is temporary storage attached directly to the physical hardware of your EC2 instance. It offers better I/O performance but does not persist after the instance is stopped or terminated.
+
+- **High Performance**: Useful for caching, scratch data, or temporary content that requires high disk performance.
+- **Ephemeral Storage**: Data is lost when the instance stops, so it's not ideal for long-term storage.
+- **Backup Responsibility**: You are responsible for backing up and replicating data if needed.
+
+### Example Use Case:
+A web application might use EC2 Instance Store to cache frequent reads and writes for faster access. However, the data is not critical, so its loss after termination is acceptable.
+
+---
+
+## Elastic File System (EFS)
+EFS is a fully-managed network file system that can be mounted to multiple EC2 instances simultaneously across multiple AZs.
+
+- **Scalability**: Automatically grows and shrinks as you add or remove files.
+- **Shared File System**: Ideal for applications needing shared access to files across multiple instances.
+- **Cost**: It is more expensive than EBS but charges based on usage, not provisioned capacity.
+
+### Example Use Case:
+An application hosted on multiple EC2 instances across `us-east-1a`, `us-east-1b`, and `us-east-1c` can mount the same EFS file system, sharing the same files and making it highly scalable and redundant.
+
+### EFS Storage Classes:
+- **EFS Standard**: The default storage class.
+- **EFS Infrequent Access (EFS-IA)**: Offers a 92% lower cost for files that are not accessed frequently, with automatic transitions based on lifecycle policies.
+
+---
+
+### Amazon Machine Images (AMIs)
+
+An **Amazon Machine Image (AMI)** represents a pre-configured template that contains the essential information to launch an EC2 instance, including the operating system, software configuration, monitoring tools, and installed applications. AMIs can be either provided by AWS, created by users, or purchased through the AWS Marketplace.
+
+By using an AMI, we can streamline the process of launching new instances, as the required software and configurations are already prepackaged. This leads to faster boot times and configuration, making the process more efficient. AMIs are region-specific but can be copied across regions to leverage the AWS global infrastructure.
+
+AMIs are created from EC2 instances that are first customized to a desired state. Once customized, the instance is stopped to ensure data integrity, and an AMI is created, which also generates associated **EBS snapshots** behind the scenes. These AMIs can then be used to launch other instances with the same configuration in different availability zones or regions.
+
+There are three primary types of AMIs:
+- **Public AMIs**: Provided by AWS, like the Amazon Linux 2 AMI.
+- **Private AMIs**: Created and maintained by users for internal use.
+- **Marketplace AMIs**: Sold by third parties through AWS Marketplace.
+
+Creating AMIs also opens up potential business opportunities, as users can package their software into an AMI and sell it through the AWS Marketplace.
+
+The **EC2 Image Builder** service further automates the process of creating, maintaining, validating, and testing AMIs. It automates the building of EC2 instances (called "Builder EC2 instances") to customize software installations, such as updates to the OS, firewalls, applications, and more. Once the EC2 instance is configured, an AMI is generated automatically.
+
+To ensure quality, **EC2 Image Builder** also validates AMIs by launching test instances to check that the configuration, security, and applications are functioning as expected. If validation passes, the AMI can be distributed across regions, enabling global deployment of applications.
+
+**Key features of EC2 Image Builder**:
+- Automates the creation and validation of AMIs.
+- Supports scheduled image builds based on criteria like weekly schedules or package updates.
+- Free service, only charging for the EC2 instances and storage used during the process.
+
+This seamless automation improves efficiency and helps maintain consistency across deployments.
+
+---
+
+## Shared Responsibility Model for EC2 Storage
+
+| **Component**              | **AWS Responsibility**                                       | **Your Responsibility**                                      |
+|----------------------------|--------------------------------------------------------------|--------------------------------------------------------------|
+| **EBS Volumes**             | Maintaining the underlying infrastructure                    | Managing data, backups, and snapshots                         |
+| **EBS Snapshots**           | Ensuring availability of the snapshot service                | Creating and managing snapshots                               |
+| **EC2 Instance Store**      | Managing the physical hardware                               | Managing data, backups, and ensuring replication              |
+| **EFS**                     | Maintaining availability and durability of the file system   | Managing data, setting lifecycle policies, and access control |
