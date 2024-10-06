@@ -386,3 +386,162 @@ Understanding how IP addresses and subnet masks work is crucial for determining 
 - **Single Stream**: Layer 3 only provides one communication stream per pair of devices. Different applications on the same devices cannot have separate communication channels.
 
 - **Out-of-Order Delivery**: Packets may arrive in a different order due to varying network paths, which is a problem Layer 4 protocols address.
+
+---
+
+# Layer 4 & 5: Transport and Session Layers
+
+## **TCP Segment Structure Overview**
+- **TCP** (Transmission Control Protocol) enables communication between two devices, such as a laptop and a game server. 
+- TCP is **connection-based**, providing a reliable communication channel.
+  
+### **TCP Segment Structure Fields**:
+1. **Source and Destination Ports**:
+   - **Source Port**: The port number on the sending device.
+   - **Destination Port**: The port number on the receiving device.
+   
+2. **Sequence Number**:
+   - Each TCP segment has a **sequence number** to ensure proper data ordering.
+   - **Example**: Client sends a segment with a sequence number `CS`; the server responds acknowledging this with `CS+1`.
+   
+3. **Acknowledgment Number**:
+   - Acknowledges receipt of data. 
+   - If data is successfully received, the acknowledgment number is **Sequence Number + 1**.
+   
+4. **Flags Field**:
+   - Controls aspects of the connection using various flags.
+     - **SYN**: Synchronizes sequence numbers (used in the initial connection).
+     - **ACK**: Acknowledges the receipt of segments.
+     - **FIN**: Terminates the connection.
+   - **Example**: A SYN is sent by the client to initiate a connection, the server replies with SYN-ACK, and the client finishes with ACK.
+   
+5. **Window Size**:
+   - Controls the **flow of data**, determining how much data can be sent before requiring an acknowledgment.
+
+6. **Checksum**:
+   - Ensures integrity by verifying that the segment's data has not been corrupted during transmission.
+
+---
+
+## **TCP Communication and Connection Establishment**
+TCP segments are encapsulated in **IP packets** at Layer 3, but TCP provides added capabilities, like **error checking** and **data reordering**.
+
+### **Three-Way Handshake**:
+Before data transfer can happen, a connection must be established using a **three-way handshake**:
+1. **Client → Server**: 
+   - The client sends a **SYN** packet with a **random sequence number (ISN)**.
+   - **Example**: Client initiates with sequence number `CS`.
+   
+2. **Server → Client**:
+   - The server responds with a **SYN-ACK**:
+     - Server sets its own sequence number `SS`.
+     - The acknowledgment number is `CS + 1`, acknowledging receipt of the client's segment.
+   
+3. **Client → Server**:
+   - The client acknowledges the server's sequence number by sending an **ACK** with `SS + 1`.
+
+At this point, both devices are **synchronized** and ready for data exchange.
+
+---
+
+## **TCP Data Transfer**
+Once the connection is established, the **data exchange** begins:
+- Data is segmented, numbered, and sent from one device to another.
+- Each side **increments the sequence numbers** for new segments and **acknowledges** the received data.
+
+### **Example**:
+1. **Client → Server**: 
+   - The client sends data starting at sequence number `CS`.
+2. **Server → Client**: 
+   - The server acknowledges the data by sending back an **ACK (CS + 1)**.
+
+TCP provides **reliable communication** by allowing segments to be retransmitted if lost or damaged.
+
+---
+
+## **Ports and Ephemeral Ports**
+- **Well-Known Ports**: Servers typically use well-known ports like **TCP 443** (HTTPS).
+- **Ephemeral Ports**: Clients use **temporary high-numbered ports** (e.g., **23060**) for communication.
+
+### **Example**:
+- **Client**: 
+  - Source Port: `23060`, Destination Port: `443` (server).
+- **Server**:
+  - Source Port: `443`, Destination Port: `23060` (client).
+
+---
+
+## **Session Management (Layer 5)**
+- TCP allows devices to create **sessions**, representing an ongoing exchange of data.
+- Once a session is established, **sequence numbers** ensure **synchronized communication** between the client and server.
+  
+### **Example**:
+- **Client**: Acknowledges the server’s sequence `SS + 1`.
+- **Server**: Acknowledges the client’s sequence `CS + 1`.
+
+This process ensures the **connection is maintained** throughout the data transfer phase.
+
+---
+
+## **Stateful vs Stateless Firewalls**
+### **Stateless Firewalls**:
+- **Do not track the connection state** and require **two rules**: 
+  - One for **outgoing traffic**.
+  - One for **incoming response traffic**.
+  
+### **Stateful Firewalls**:
+- **Track the state** of the TCP segments.
+- Automatically allow **response traffic** once the initial connection is established.
+
+### **Example**:
+- **Stateless Firewall**:
+  - A client using port `23060` to connect to a server on port `443` requires:
+    - Rule 1: Allow **outgoing** traffic from port `23060` to `443`.
+    - Rule 2: Allow **incoming** traffic from port `443` to `23060`.
+- **Stateful Firewall**:
+  - Only one rule is required: Allow **outgoing** traffic from `23060 → 443`. Response traffic is automatically permitted.
+
+---
+
+## **Flags and Connection Termination**
+### **Common TCP Flags**:
+1. **SYN**: Initiates connection.
+2. **ACK**: Acknowledges receipt of data.
+3. **FIN**: Gracefully terminates a connection.
+4. **RST**: Abruptly resets the connection.
+
+### **Connection Termination**:
+1. **FIN** packet is sent by one side to initiate closure.
+2. The other side responds with an **ACK** and sends its own **FIN**.
+3. The original sender acknowledges with **ACK**, ending the session.
+
+---
+
+## **Firewall Rules for Secure Communication**
+- TCP sessions can be secured using firewalls by setting appropriate rules for **incoming and outgoing traffic**.
+- **Ephemeral ports** must often be allowed to enable proper communication.
+
+### **Firewall Example**:
+- **Outbound**: Allow traffic from the client IP (`23060`) to the server’s IP (`443`).
+- **Inbound**: Allow traffic from the server IP (`443`) to the client IP (`23060`).
+
+---
+
+## **Session State and Security**
+- **Stateless Firewalls**: Require separate rules for outgoing and incoming traffic.
+- **Stateful Firewalls**: Automatically handle response traffic once an outgoing connection is permitted.
+
+In AWS, **Network Access Control Lists (NACLs)** are **stateless**, while **Security Groups** are **stateful**.
+
+---
+
+## **Layer 4 vs Layer 5 Debate**
+- **Layer 4 (Transport)**: Deals with **TCP segments**, **port numbers**, and **IP addresses**.
+- **Layer 5 (Session)**: Manages **sessions** and maintains **persistent communication** between two devices.
+  
+However, in practice, Layer 4 (Transport) and Layer 5 (Session) are often discussed together, as they both involve managing **connections** and **data flow**.
+
+---
+
+
+
