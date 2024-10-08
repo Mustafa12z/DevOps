@@ -1341,3 +1341,216 @@ Storage Gateway uses Amazon EBS, S3, and Glacier as storage backends. It enables
   - Supports various database technologies for seamless migration.
 - **Keywords**: DMS, database migration, homogeneous migration, heterogeneous migration, AWS.
 
+
+---
+
+# 🖥️ Other Compute Services
+
+## Docker Overview
+
+**Docker** is a software development platform used to package and deploy applications in containers. A container encapsulates everything an application needs to run, making it highly portable across different environments. This eliminates compatibility issues and ensures predictable behavior regardless of where the app is run.
+
+- **Key Benefits:**
+  - Works on any operating system and with any programming language.
+  - Scales containers up or down quickly, within seconds.
+  - Containers can be run on any machine, reducing work and simplifying deployment.
+  - Compatible with various technologies such as **Java**, **NodeJS**, **MySQL**, and more.
+
+**Example:**  
+On a single EC2 instance, you can run multiple Docker containers, each with different applications such as:
+- Docker container running Java code.
+- Docker container running a NodeJS application.
+- Docker container running a MySQL database.
+
+**Docker Images:**  
+- Applications are packaged into **Docker images**, which are stored in Docker repositories.
+  - **Public repository:** Docker Hub, where you can find images for technologies like **Ubuntu**, **MySQL**, and **NodeJS**.
+  - **Private repository:** AWS provides **Amazon Elastic Container Registry (ECR)** for storing private Docker images.
+
+**Containers vs. Virtual Machines:**  
+Docker containers share resources with the host machine, which makes them lightweight compared to virtual machines. Unlike virtual machines, which each run their own guest OS, containers run on the host OS with the help of the **Docker Daemon**.
+
+**Comparing EC2 and Docker:**
+- With EC2, each instance has its own OS and applications.
+- With Docker, multiple containers can run on one EC2 instance, using fewer resources and providing greater efficiency.
+
+This flexibility makes Docker a powerful tool for modern application deployment, particularly when combined with AWS services like EC2 and ECR.
+
+## Amazon ECS
+
+**Elastic Container Service (ECS)** is used to launch Docker containers on AWS. It requires users to provision and maintain the infrastructure, meaning you need to set up EC2 instances in advance, where AWS will run and manage your Docker containers.
+
+- **Key Points:**
+  - Requires EC2 instances to be created in advance.
+  - AWS automatically places containers on available EC2 instances.
+  - Integration with Application Load Balancer for web applications.
+  - Suitable for managing Docker containers directly on EC2.
+
+**Example:**  
+You have multiple EC2 instances running various containers, and ECS intelligently assigns containers to the available instances.
+
+
+## AWS Fargate
+
+**Fargate** is a serverless alternative to ECS, designed to run Docker containers on AWS without the need for provisioning EC2 instances.
+
+- **Key Points:**
+  - No need to manage EC2 infrastructure.
+  - AWS handles container deployment based on CPU and RAM specifications.
+  - Completely serverless and easier to use compared to ECS.
+
+**Example:**  
+Fargate automatically runs your Docker container without requiring any EC2 instances, handling everything behind the scenes.
+
+
+
+## Amazon ECR
+
+**Elastic Container Registry (ECR)** is a private Docker registry that stores Docker images on AWS. Both ECS and Fargate can pull images from ECR to launch containers.
+
+- **Key Points:**
+  - Stores Docker images in a private repository.
+  - Used by ECS or Fargate to deploy containers.
+
+**Example:**  
+You store your application’s Docker images in ECR. Fargate then pulls these images and creates containers directly based on your specifications.
+
+## ⚡ Serverless Services
+
+**Serverless** refers to a computing paradigm where developers focus solely on writing and deploying code without worrying about managing or provisioning servers. The underlying infrastructure is managed by the cloud provider, freeing developers from infrastructure-related tasks.
+
+### Example of Serverless Services
+
+- **Lambda** is a Function as a Service (FaaS) that runs individual functions in response to events, allowing developers to deploy code without server management.  
+    - You deploy a function that gets triggered whenever an image is uploaded to **S3**, and Lambda automatically processes that image without the need for provisioning servers.
+- **Simple Storage Service (S3)** is a serverless storage service that allows users to store and retrieve data without managing servers, automatically scaling to handle any amount of data.
+    - You upload files to **S3**, and S3 handles all the underlying infrastructure without the need for provisioning or managing servers.
+- **DynamoDB** is a fully-managed, serverless NoSQL database that automatically scales based on demand, allowing developers to focus on defining tables and data structures.
+    - You create a DynamoDB table to store user information for a web application. DynamoDB automatically adjusts its capacity based on the number of users accessing it without you managing any servers.
+- **Fargate** is a serverless compute engine for containers, enabling developers to run containers without provisioning or managing EC2 instances.
+    - You create a **Docker** container for your web application, and **Fargate** runs it without you having to set up any EC2 instances or infrastructure.
+
+
+
+**Serverless** computing enables rapid development by abstracting infrastructure management, allowing developers to focus purely on their code or applications. From Lambda functions to DynamoDB and S3 storage, AWS offers a broad range of serverless services tailored to different use cases.
+
+## AWS Lambda
+
+**Lambda** is AWS's **Function as a Service (FaaS)** offering, enabling users to run functions in the cloud without provisioning or managing servers.
+
+### Key Characteristics:
+- **Serverless:** No need to manage underlying infrastructure (no servers to manage or provision).
+- **Event-driven:** Lambda functions are triggered by events (e.g., file uploads, API calls).
+- **Scaling:** Automatically scales with demand—no need to set up or manage Auto Scaling groups.
+
+### Key Benefits:
+- **Pricing:** Simple and cost-effective, with a generous free tier (1 million invocations and 400,000 GB-seconds of compute time per month).
+- **Language Support:** Compatible with multiple languages like Node.js, Python, Java, C#, Ruby, and others through the Custom Runtime API.
+- **Integration:** Deep integration with AWS services like S3, DynamoDB, CloudWatch, and EventBridge.
+- **Event-driven Scaling:** Lambda automatically handles scaling based on event triggers, making it highly responsive and efficient.
+
+### Lambda Pricing:
+- **Requests:** 1 million free requests per month; $0.20 per additional 1 million requests.
+- **Duration:** Free tier provides 400,000 GB-seconds of compute time; beyond that, it's $1 per 600,000 GB-seconds.
+
+### Use Cases:
+1. **Serverless Thumbnail Creation**
+   - Upload an image to **S3** → triggers a **Lambda** function → Lambda generates a thumbnail → stores it back in **S3** and saves metadata in **DynamoDB**.
+   - No servers are provisioned for S3, Lambda, or DynamoDB, and the solution scales seamlessly.
+
+2. **Serverless CRON Jobs**
+   - Use **CloudWatch Events** or **EventBridge** to trigger a **Lambda** function at scheduled intervals (e.g., hourly, daily) to run tasks like backups or data processing.
+   - All serverless, replacing traditional Linux-based CRON jobs with a fully managed, scalable approach.
+
+Lambda is ideal for applications where event-driven, short-duration tasks are needed, and it allows developers to focus solely on writing and deploying code, leaving AWS to handle all server-related concerns.
+
+## Amazon API Gateway
+
+**Amazon API Gateway** is a fully managed service that allows developers to easily create and manage APIs to expose services, particularly in serverless architectures.
+
+### Key Features:
+- **Serverless:** Fully managed and serverless, no need to manage underlying infrastructure.
+- **RESTful & WebSocket APIs:** Supports both standard **RESTful APIs** (for CRUD operations) and **WebSocket APIs** (for real-time data streaming).
+- **Scalable:** Automatically scales to accommodate any number of API requests.
+- **Security:** Provides built-in features like **user authentication**, **API throttling**, and **API keys** for managing and securing access to APIs.
+- **Monitoring:** Integrated with **CloudWatch** for monitoring API performance and usage metrics.
+
+### Key Use Cases:
+- **Serverless HTTP API Creation:** When building serverless architectures with **Lambda** and **DynamoDB**, use API Gateway to expose Lambda functions as APIs that external clients can interact with.
+- **Real-Time Data Streaming:** Utilize WebSocket APIs for use cases requiring continuous, real-time data exchange.
+
+### Example Scenario:
+1. A **client** sends a request to the **API Gateway**.
+2. The API Gateway forwards (proxies) the request to the **Lambda** function.
+3. The Lambda function performs operations (e.g., reading or updating data from **DynamoDB**).
+4. The response is sent back to the client via the API Gateway.
+
+### Benefits:
+- **Simplified API Management:** Easily create, publish, and maintain APIs without worrying about infrastructure.
+- **Seamless Integration with Serverless Services:** Works smoothly with Lambda and other AWS services, ideal for building scalable and efficient serverless architectures.
+
+API Gateway is the go-to solution for exposing AWS Lambda functions or other services as HTTP APIs, making it a core component in many serverless applications.
+
+## AWS Batch
+
+**AWS Batch** is a fully managed service that allows for efficient batch processing of jobs at any scale, utilizing the power of AWS infrastructure.
+
+### Key Features:
+- **Batch Processing:** Handles batch jobs, which have a clear start and end time, unlike continuous or streaming jobs.
+- **Dynamic Scaling:** AWS Batch can dynamically launch **EC2 instances** or **Spot Instances** based on the demand and scale of the batch jobs, optimizing cost and resource usage.
+- **Managed Compute:** AWS Batch provisions the right amount of compute and memory automatically based on the requirements of the jobs in the queue.
+
+### Defining a Batch Job:
+- **Docker Image + ECS Task Definition:** Batch jobs are defined as **Docker images** with an **ECS task definition**, meaning anything that runs on ECS can run on AWS Batch.
+
+### Example Use Case:
+- **Image Processing Pipeline:**
+  1. Users upload images to an **S3 bucket**.
+  2. This triggers a batch job, which processes the images.
+  3. AWS Batch dynamically scales up EC2 or Spot Instances.
+  4. The Docker containers run on these instances, performing the image processing.
+  5. Processed images are saved back to another S3 bucket.
+
+### AWS Batch vs AWS Lambda:
+| **Feature**          | **AWS Batch**                          | **AWS Lambda**                       |
+|----------------------|----------------------------------------|--------------------------------------|
+| **Time Limit**        | No time limit (runs on EC2 instances)  | 15 minutes                           |
+| **Runtime Flexibility**| Any runtime via Docker images         | Limited to specific programming languages (e.g., Python, Node.js) |
+| **Disk Space**        | Uses EC2 instance storage (EBS/Instance Store) | Limited temporary disk space         |
+| **Scaling**           | Dynamic scaling of EC2/Spot instances  | Automatic, serverless scaling        |
+| **Serverless?**       | Managed service, but not serverless    | Fully serverless                     |
+
+AWS Batch is ideal for longer-running, resource-intensive tasks that don't have the constraints of AWS Lambda, offering greater flexibility in runtimes and storage options.
+
+## Amazon Lightsail Notes
+
+**Amazon Lightsail** is a simplified cloud platform designed for users with little to no cloud experience, providing an easy way to get started with virtual servers, storage, databases, and networking. It stands out from other AWS services due to its simplicity and predictable pricing model.
+
+### Key Features:
+- **Virtual Servers, Storage, Databases, and Networking:** Everything is bundled into one platform, making it easy for beginners.
+- **Low and Predictable Pricing:** Designed for users who need clarity on costs without managing complex cloud services.
+- **Templates for Popular Stacks:** Lightsail offers templates for common web applications and environments such as:
+  - **LAMP Stack**
+  - **Nginx**
+  - **MEAN Stack**
+  - **Node.js**
+  - **WordPress**
+  - **Magento**
+  - **Plesk**
+  - **Joomla**
+
+### Use Cases:
+- **Simple Web Applications:** Quick deployment of web apps using pre-configured templates.
+- **Development and Testing Environments:** Great for lightweight environments where high availability and AWS service integration are less critical.
+  
+### High Availability and Limitations:
+- **High Availability:** Some built-in high availability features, but no auto-scaling.
+- **Limited AWS Integrations:** Lightsail has fewer integrations with the broader AWS ecosystem, making it less flexible than using individual AWS services like EC2, RDS, and others.
+
+### Ideal for:
+- **Beginners** with no cloud experience looking for quick setup and low maintenance.
+- **Non-technical users** who want to deploy websites or small applications without diving into the complexity of AWS services.
+
+For the **AWS exam**, Lightsail is often the answer when the question refers to users with minimal cloud knowledge needing a simple, low-cost, and quick-to-implement solution.
+
+---
