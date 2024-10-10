@@ -1844,4 +1844,295 @@ By leveraging CloudFront’s extensive network of edge locations, you can distri
    - **Global Reach:** Improved read and write latency as requests can be handled by the nearest region.
    - **Complexity:** High; requires careful synchronization and management of data across regions. An example of a service that supports this architecture is **DynamoDB Global Tables**.
 
+--- 
+
+# Cloud Integration
+
+## Amazon SQS (Simple Queue Service)
+
+- **Purpose**: Allows decoupling of applications through message queuing.
+  
+- **Queue Concept**: 
+  - Producers send messages to the queue.
+  - Consumers poll the queue to read messages.
+  - Can have multiple producers and consumers.
+  - Consumers process messages and delete them from the queue.
+
+- **Key Features**:
+  - Fully managed and serverless; no need to provision servers.
+  - Scales seamlessly from one message per second to tens of thousands.
+  - Default message retention: 4 days (maximum of 14 days).
+  - No limit on the number of messages in a queue.
+  - Low latency (less than 10 milliseconds).
+  
+- **Architecture Example**:
+  - Web servers take requests via an application balancer.
+  - EC2 instances in an auto-scaling group handle requests.
+  - For tasks like video processing, messages are inserted into an SQS queue.
+  - A separate video processing layer reads from the SQS queue and processes videos.
+  - Allows for independent scaling of the processing layer based on queue length.
+
+- **FIFO Queues**:
+  - FIFO stands for First In First Out.
+  - Ensures messages are processed in the order they were sent.
+  - If a producer sends messages in order (e.g., 1, 2, 3, 4), the consumer reads them in the same order.
+
+## Amazon Kinesis
+
+- **Purpose**: Real-time big data streaming service.
+
+- **Overview**: 
+  - Managed service for collecting, processing, and analyzing real-time streaming data at any scale.
+
+## Amazon SNS (Simple Notification Service)
+
+- **Purpose**: Decouples applications by enabling a pub/sub messaging model.
+
+- **Overview**: 
+  - Allows a single message to be sent to multiple receivers efficiently.
+  - Eliminates the need for direct integration between multiple services.
+
+- **How It Works**:
+  - An event publisher sends messages to an SNS topic.
+  - The SNS topic automatically distributes these messages to all subscribed receivers (e.g., fraud service, shipping service, SQS queue).
+  
+- **Key Features**:
+  - Each subscriber receives all messages sent to the SNS topic.
+  - Each topic can have over **12 million subscriptions**.
+  - Soft limit of **100,000 topics** per account.
+
+- **Destinations**:
+  - SNS can publish messages to various targets, including:
+    - **AWS Services**: SQS, AWS Lambda, Kinesis Data Firehose.
+    - **Direct Notifications**: Emails, SMS, mobile notifications.
+    - **HTTP/HTTPS Endpoints**: Allows integration with external services.
+
+## Amazon MQ
+
+- **Purpose**: Managed message broker service for traditional messaging protocols.
+
+- **Overview**:
+  - Supports open protocols such as MQTT, AMQP, STOMP, Openwire, and WSS.
+  - Ideal for migrating on-premises applications to the cloud without re-engineering to use proprietary AWS protocols like SQS and SNS.
+
+- **Key Technologies**:
+  - Supports **RabbitMQ** and **ActiveMQ**, which are traditional message broker technologies.
+  - Provides managed versions of these brokers in the cloud.
+
+- **Features**:
+  - **Scalability**: 
+    - Does not scale as infinitely as SQS or SNS, as it runs on servers.
+    - May face server-related issues.
+  - **High Availability**: 
+    - Supports multi-AZ setups with failover capabilities for increased reliability.
+  - **Message Types**:
+    - Offers both queue and topic features, similar to SQS and SNS, respectively, within a single broker.
+
+- **Use Cases**:
+  - Suitable for companies migrating to the cloud that require open protocol support.
+  - Recommended only when traditional messaging protocols are necessary; otherwise, SQS and SNS are preferred for their scalability and integration with AWS services.
+
+
 ---
+## Cloud Monitoring
+
+## CloudWatch Metrics
+
+### Overview:
+
+ CloudWatch provides metrics for every AWS service, and a metric is a variable used for monitoring (e.g., CPU utilization, NetworkIn). These metrics are time-stamped and can be visualized on a CloudWatch dashboard.
+
+### Examples of Metrics:
+
+  - Billing Metric: 
+    - Available only in the `us-east-1` region.
+  - EC2 Instance Metrics:
+      - CPUUtilization: Measures how much the CPU is working. High usage could indicate the need for scaling.
+      - StatusCheck: Ensures that EC2 instances are functioning properly.
+      - NetworkIn/NetworkOut: Tracks network traffic into and out of an EC2 instance.
+  - EBS Volume Metrics: 
+  - S3 Bucket Metrics:
+  - Service Limits: 
+
+- **Metric Frequency**: 
+  - Default metrics are available every 5 minutes.
+  - Detailed monitoring provides metrics every 1 minute, but is more expensive.
+
+## CloudWatch Alarms
+
+### Purpose: 
+
+Alarms trigger notifications or actions based on metric thresholds. When a metric exceeds or falls below a defined threshold, alarms are activated.
+
+### Alarm Actions:
+
+  - **Auto Scaling Group**: Adjusts the number of EC2 instances in a group (scale up/down) based on alarm conditions.
+  - **EC2 Actions**: Can stop, terminate, reboot, or recover an EC2 instance.
+  - **SNS Notifications**: Sends notifications to an SNS topic.
+    - Example: If EC2 CPU utilization exceeds 90%, an email notification can be sent for investigation.
+
+- **Customization**:
+  - Alarms can be set based on sampling, percentage, max/min values, etc.
+  - Users can choose the evaluation period (e.g., 5 minutes, 10 minutes, 1 hour).
+
+- **Billing Alarms**:
+  - A billing alarm can be created on the CloudWatch Billing metric to notify when spending exceeds a specific threshold (e.g., $10 or $20).
+
+### Alarm States:
+
+  - **OK**: Everything is functioning normally.
+  - **INSUFFICIENT_DATA**: Not enough data points to evaluate the alarm.
+  - **ALARM**: The condition has been met, and the alarm is triggered.
+
+## CloudWatch Logs
+
+### Overview:
+
+ CloudWatch Logs is used to collect, monitor, and store log files from various AWS services and servers. Logs help track and troubleshoot application activities by providing detailed information on how applications are functioning.
+
+ ### Key Concepts
+
+- **Log Files**: 
+  - Log files are records generated by applications and systems detailing actions and events, such as user activities, cleanups, and errors.
+  - These logs are essential for troubleshooting and understanding application behavior.  
+- **Sources of Logs**:
+  - **Elastic Beanstalk**: Application logs.
+  - **ECS**: Logs from containerized applications.
+  - **Lambda**: Function execution logs.
+  - **CloudTrail**: API call history.
+  - **CloudWatch Logs Agents**: Installed on EC2 instances or on-premise servers to push logs.
+  - **Route 53**: DNS query logs.  
+- **Log Retention**:
+  - Logs can be stored for customizable durations, ranging from 1 week to infinite retention, depending on user needs.
+- **Hybrid Support**:
+  - The CloudWatch Logs agent can also be installed on on-premises servers, allowing the collection of logs from both AWS and non-AWS environments.
+  - This hybrid capability provides centralized log monitoring for both cloud and on-premises servers.
+
+### Use Case Example:
+  - An EC2 instance runs a web server application. To monitor server performance and troubleshoot issues, a CloudWatch Logs agent is installed. This agent sends log data (such as HTTP request logs) to CloudWatch Logs. If the server encounters an error, administrators can quickly check the logs in CloudWatch Logs for details about the issue.
+
+## EventBridge
+
+### Purpose: 
+
+React to events happening in your AWS account or external services and automate responses.
+
+### key Concepts
+
+- **Event Sources**:
+  - AWS services like **EC2**, **S3**, **IAM**, **Trusted Advisor**, and more.
+  - **Third-party partners** (e.g., Zendesk, Datadog).
+  - **Custom applications** can also send events.
+
+- **Use Case**: 
+  - Example: Triggering a **Lambda function** every hour (serverless cron job).
+  - Example: Alerting security teams when the **root user** signs in via **SNS** notifications.
+
+- **Types of Event Buses**:
+  - **Default Event Bus**: Reacts to AWS service events or scheduled events.
+  - **Partner Event Bus**: Receives events from external partners like Zendesk or Datadog.
+  - **Custom Event Bus**: Allows custom applications to send events.
+
+- **Additional Features**:
+  - **Schema Registry**: Models event schema to see data types.
+  - **Event Archiving**: Archive events and replay them later.
+
+
+## CloudTrail
+
+### Purpose: 
+
+Provides governance, compliance, and auditing for AWS accounts by tracking all API calls and events.
+
+### Key Concepts
+- **Tracked Activities**:
+  - **Console access**: Logs actions taken by users logged into the AWS Console.
+  - **SDK and CLI usage**: Tracks interactions via AWS SDKs or Command Line Interface.
+  - **Service activity**: Logs API calls and actions taken by services across your account.
+- **Log Destinations**:
+  - **CloudWatch Logs**: For real-time monitoring and event tracking.
+  - **Amazon S3**: For long-term storage and retention of logs.
+- **Global Trail**:
+  - You can enable CloudTrail across **all AWS regions** for global visibility or restrict it to a single region.
+    - Example: If an object is deleted, CloudTrail can be used to determine **who** deleted it, **when** it happened, and **what** was deleted.
+- **Retention**:
+  - **CloudWatch Logs**: For short-term, real-time analysis.
+  - **S3**: For long-term storage and auditing purposes.
+- **Audit & Inspection**:
+  - CloudTrail allows for detailed **inspection** and **audit** of actions by users, IAM roles, and AWS services.
+
+## AWS X-Ray
+
+### Purpose: 
+
+AWS X-Ray helps trace and analyze distributed applications, especially those using microservices architecture, by providing a **visual representation** of system interactions.
+  - AWS X-Ray offers **centralized tracing**, making it easier to identify issues across complex architectures.
+
+### Key Concepts:
+
+  - **Distributed Tracing**: Tracks requests as they travel through different services in a system.
+  - **Visual Analysis**: Provides a **visual service graph** showing the connections and performance of services.
+  - **Bottleneck Detection**: Identifies performance bottlenecks and highlights services with delays or issues.
+  - **Error and Exception Tracing**: Pinpoints specific errors and exceptions within a request’s flow.
+  - **SLA Monitoring**: Verifies if services are meeting their **Service-Level Agreements** (response times and availability).
+  - **User Impact Assessment**: Shows which users might be impacted by issues or outages.
+
+- **Use Cases**:
+  - **Microservices**: Helps visualize complex, decoupled services interacting through queues (SQS, SNS) or other messaging systems.
+  - **Performance Troubleshooting**: Identifies areas where requests are being **throttled** or slowed down.
+  - **Request Behavior**: Analyzes specific requests to understand behavior and locate **errors** or **exceptions**.
+
+- **Advantages**:
+  - Simplifies **troubleshooting** by visualizing system interactions.
+  - Enhances understanding of **service dependencies** in microservice architectures.
+  - Provides insight into the **overall health** of distributed systems.
+
+
+## Amazon CodeGuru - Key Concepts
+
+### Purpose:
+
+Amazon CodeGuru uses **machine learning** to improve code quality and performance by providing automated **code reviews** and **application performance** recommendations.
+
+### Key Concepts:
+  1. **CodeGuru Reviewer**: 
+     - Performs **automated code reviews** with static code analysis.
+     - Reviews code stored in repositories like **CodeCommit**, **GitHub**, and **Bitbucket**.
+     - Detects **bugs**, **memory leaks**, and **security vulnerabilities** before production.
+     - Provides **actionable recommendations** based on machine learning analysis of open-source repositories and Amazon’s internal code.
+     - Supports **Java** and **Python**.
+  2. **CodeGuru Profiler**:
+     - Monitors the **runtime behavior** of applications in production or pre-production.
+     - Identifies **performance bottlenecks** and **cost optimization** opportunities.
+     - Highlights expensive lines of code that affect **CPU utilization** and **memory usage**.
+     - Provides **heap summaries** and **anomaly detection** for better resource management.
+     - Supports both **AWS Cloud** and **on-premises** applications with minimal overhead.
+
+- **Use Cases**:
+  - **Automated Code Review**: Detect **critical issues** like resource leaks, security holes, and inefficient coding practices **before** manual reviews.
+  - **Performance Optimization**: Improve application efficiency by **reducing CPU usage** and identifying performance anomalies in **real-time**.
+  - **Cost Management**: Minimize compute costs by addressing code inefficiencies during runtime.
+
+## AWS Health Dashboard 
+
+### Overview: 
+
+The AWS Health Dashboard provides **real-time** visibility into the **health** and **performance** of AWS services at a global level and specifically for your AWS account.
+
+### Key Concepts:
+  1. **Service Health Dashboard (Global)**:
+     - Displays the **health status** of AWS services across all **regions**.
+     - Offers **historical information** on service disruptions and performance issues.
+     - Includes an **RSS feed** for subscription, enabling updates on any global AWS service events.
+  2. **Account Health Dashboard**:
+     - Also known as **AWS Personal Health Dashboard** (PHD).
+     - Provides **alerts**, **remediation guidance**, and **notifications** specific to the AWS services and resources used within your **AWS account**.
+     - Delivers **relevant**, **timely** updates on issues impacting your account, such as **scheduled maintenance** or service disruptions.
+     - Aggregates health information across your entire **AWS Organization**.
+
+- **Use Cases**:
+  - **Service Monitoring**: Track the **health** of AWS services across **regions** and review **historical data** to see if a service has had past issues.
+  - **Proactive Alerts**: Get **notifications** and guidance on **service events** that could affect your AWS resources, such as **outages** or **scheduled maintenance**.
+  - **Global and Personal Insights**: Use the **Service Health Dashboard** for global AWS health information, while relying on the **Account Health Dashboard** for issues directly related to your **specific AWS services**.
+
+
