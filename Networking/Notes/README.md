@@ -543,5 +543,209 @@ However, in practice, Layer 4 (Transport) and Layer 5 (Session) are often discus
 
 ---
 
+# Network Address Translation (NAT)
 
+## Overview
+Network Address Translation (NAT) is a crucial process used in home networks, business networks, and cloud environments like AWS. Its primary function is to translate private IP addresses into public IP addresses to enable devices within a private network to communicate over the internet. NAT also addresses the shortage of IPv4 addresses and provides additional security benefits.
+
+## Types of IP Addresses:
+- **Public IP Addresses**: Assigned by central/regional agencies and must be unique.
+- **Private IP Addresses**: Cannot be routed over the internet and fall within specific IP ranges (e.g., 10.0.0.0). Used within internal networks.
+
+## Purpose of NAT:
+Since private IP addresses cannot be routed over the public internet, NAT allows devices with private IP addresses to access external services by translating them into public IP addresses.
+
+---
+
+## Types of NAT
+
+1. **Static NAT**
+   - Translates one specific private IP address into a specific public IP address.
+   - Used when devices need consistent, direct internet access via a public IP.
+   - Example: AWS Internet Gateway uses static NAT.
+   
+   **Example:**
+   - **Private IP:** `10.0.0.42` (laptop)
+   - **Public IP:** `52.95.36.67` (mapped for internet access)
+   - A packet sent to Netflix from the laptop with a private IP will have its source IP translated to the allocated public IP, allowing communication.
+
+2. **Dynamic NAT**
+   - Allocates public IP addresses from a pool on an as-needed basis.
+   - Used when a large number of devices require internet access but fewer public IP addresses are available.
+   - More efficient in managing IP address resources compared to static NAT.
+
+   **Example:**
+   - **Private IPs:** 
+     - Device 1: `10.0.0.10`
+     - Device 2: `10.0.0.20`
+   - **Public IP Pool:** 
+     - `52.95.36.66`
+     - `52.95.36.67`
+   - **NAT Table:**
+     | Private IP  | Allocated Public IP | Status     |
+     |-------------|---------------------|------------|
+     | `10.0.0.10` | `52.95.36.66`       | Active     |
+     | `10.0.0.20` | `52.95.36.67`       | Active     |
+
+3. **Port Address Translation (PAT)**
+   - Allows many private IP addresses to share a single public IP address.
+   - Differentiates devices by assigning unique port numbers.
+   - Commonly used in home networks where multiple devices (e.g., phones, laptops) share a single public IP address.
+   - Example: Home router.
+
+   **Example:**
+   - **Private Devices:** 
+     - Device 1: `10.0.0.42`, Source Port: `32768`
+     - Device 2: `10.0.0.43`, Source Port: `32769`
+   - **Public IP:** `52.95.36.67`
+   - **NAT Table:**
+     | Private IP  | Source Port | Allocated Public Port | Public IP      |
+     |-------------|-------------|-----------------------|-----------------|
+     | `10.0.0.42` | `32768`     | `1337`                | `52.95.36.67`   |
+     | `10.0.0.43` | `32769`     | `1338`                | `52.95.36.67`   |
+
+---
+
+## NAT in IPv6
+- NAT is not necessary with IPv6 due to the abundance of available IP addresses, which eliminates the need for private/public IP differentiation.
+
+---
+
+## NAT Table
+- A **NAT table** stores the mapping of private to public IP addresses.
+- **Static NAT Example**:
+   - **Private IP (laptop):** `10.0.0.42`
+   - **Public IP:** `52.95.36.67` 
+   - The NAT device translates the source IP to the public IP when sending packets to external services (e.g., Netflix).
+   
+---
+
+## NAT Example with Static NAT
+- **Scenario**: Two private devices (server and laptop) need access to external services like Netflix or a public API.
+  - **Private IPs**: 
+     - Server: `10.0.0.10`
+     - Laptop: `10.0.0.42`
+  - **Public IP (allocated via NAT)**: 
+     - Server: `52.95.36.68`
+     - Laptop: `52.95.36.67`
+  - The NAT device ensures that when packets from the server or laptop pass through, the source private IP is replaced with the corresponding public IP, enabling communication with public services.
+
+## NAT Example with Dynamic NAT
+- **Scenario**: A network with multiple private devices needs to access external services, but there are fewer public IP addresses available than devices.
+  - **Private IPs**: 
+     - Device 1: `10.0.0.10`
+     - Device 2: `10.0.0.20`
+     - Device 3: `10.0.0.30`
+     - Device 4: `10.0.0.40`
+  - **Public IP Pool**: 
+     - `52.95.36.66`
+     - `52.95.36.67`
+  - **NAT Table**: 
+     | Private IP  | Allocated Public IP |
+     |-------------|---------------------|
+     | `10.0.0.10` | `52.95.36.66`       |
+     | `10.0.0.20` | `52.95.36.67`       |
+  - In this scenario, the NAT device dynamically allocates public IP addresses from the pool as devices attempt to access external services. For instance, if Device 1 sends a request, it is assigned `52.95.36.66` for its session.
+
+---
+
+## NAT Example with Port Address Translation (PAT)
+- **Scenario**: Multiple private devices on a home network want to access the internet using a single public IP address.
+  - **Private Devices**: 
+     - Device 1: `10.0.0.42`, Source Port: `32768`
+     - Device 2: `10.0.0.43`, Source Port: `32769`
+     - Device 3: `10.0.0.44`, Source Port: `32770`
+  - **Public IP**: `52.95.36.67`
+  - **NAT Table**: 
+     | Private IP  | Source Port | Allocated Public Port |
+     |-------------|-------------|-----------------------|
+     | `10.0.0.42` | `32768`     | `1337`                |
+     | `10.0.0.43` | `32769`     | `1338`                |
+     | `10.0.0.44` | `32770`     | `1339`                |
+  - In this scenario, the NAT device uses PAT to allow all private devices to share the same public IP (`52.95.36.67`) while maintaining unique session identifiers through port numbers. When a request is made from Device 1, it is translated to `52.95.36.67:1337`, and the NAT device keeps track of these translations for response traffic.
+
+# Stateless and Stateful Firewalls
+
+## Overview
+Firewalls play a critical role in network security by controlling the flow of traffic based on predetermined security rules. There are two main types of firewalls: stateless and stateful, each handling traffic in distinct ways.
+
+---
+
+## Stateless Firewalls
+- Stateless firewalls treat each packet in isolation. They do not maintain any information about the state of connections, which means they cannot make decisions based on the history of packets.
+- They assess each packet based solely on predefined rules without considering the context of the connection.
+
+**Example Scenario:**
+- Bob's laptop (client) connects to the mapping server. The stateless firewall requires separate rules for the request and the response.
+
+### Request:
+- **Outgoing Request:**
+  - **Source IP:** `119.18.36.73` (Bob's Laptop)
+  - **Destination IP:** `1.3.3.7` (Mapping Server)
+  - **Source Port:** Ephemeral port chosen by Bob's Laptop
+  - **Destination Port:** `443` (HTTPS)
+
+### Response:
+- **Incoming Response:**
+  - **Source IP:** `1.3.3.7` (Mapping Server)
+  - **Destination IP:** `119.18.36.73` (Bob's Laptop)
+  - **Source Port:** `443` (HTTPS)
+  - **Destination Port:** Ephemeral port chosen by Bob's Laptop
+
+- **Firewall Rules:**
+  - Rule 1: Allow outgoing requests to destination port `443`.
+  - Rule 2: Allow incoming responses from source port `443`.
+
+---
+
+## Stateful Firewalls
+- Stateful firewalls keep track of the state of active connections and make decisions based on the context of the traffic flow. They understand the state of each connection and can match requests with their corresponding responses.
+
+**Example Scenario:**
+- Bob's laptop connects to the mapping server and also communicates with a software update server.
+
+### Request to Mapping Server:
+- **Outgoing Request:**
+  - **Source IP:** `119.18.36.73` (Bob's Laptop)
+  - **Destination IP:** `1.3.3.7` (Mapping Server)
+  - **Source Port:** Ephemeral port chosen by Bob's Laptop
+  - **Destination Port:** `443` (HTTPS)
+
+### Response from Mapping Server:
+- **Incoming Response:**
+  - **Source IP:** `1.3.3.7` (Mapping Server)
+  - **Destination IP:** `119.18.36.73` (Bob's Laptop)
+  - **Source Port:** `443` (HTTPS)
+  - **Destination Port:** Ephemeral port chosen by Bob's Laptop
+
+### Request to Software Update Server:
+- **Outgoing Request:**
+  - **Source IP:** `1.3.3.7` (Mapping Server)
+  - **Destination IP:** `2.4.6.8` (Software Update Server)
+  - **Source Port:** Ephemeral port chosen by Mapping Server
+  - **Destination Port:** `80` (HTTP)
+
+### Response from Software Update Server:
+- **Incoming Response:**
+  - **Source IP:** `2.4.6.8` (Software Update Server)
+  - **Destination IP:** `1.3.3.7` (Mapping Server)
+  - **Source Port:** `80` (HTTP)
+  - **Destination Port:** Ephemeral port chosen by Mapping Server
+
+- **Firewall Rules:**
+  - Rule: Allow outgoing requests to destination port `443` for mapping and `80` for software updates.
+  - The firewall automatically allows the corresponding incoming responses based on the stateful connection tracking.
+
+---
+
+## Key Differences
+- **Stateful Firewalls:** 
+  - Track connection states, simplifying rule management.
+  - Automatically allow responses based on the initial request.
+  
+- **Stateless Firewalls:**
+  - Treat each packet independently, requiring separate rules for requests and responses.
+  - More management overhead due to the need for distinct rules for each direction of communication.
+
+By understanding these concepts, you can better appreciate how firewalls enhance network security and the management of traffic.
 
